@@ -1,6 +1,28 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const VolunteerList = () => {
+  const [volunteerList, setVolunteerList] = useState();
+
+  useEffect(() => {
+    fetch("https://infinite-temple-84022.herokuapp.com/volunteersList")
+      .then((res) => res.json())
+      .then((data) => setVolunteerList(data));
+  }, [volunteerList]);
+
+  const handleDelete = (_id) => {
+    fetch("https://infinite-temple-84022.herokuapp.com/loggedInVolunteer", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: _id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        toast.success("Volunteer Deleted Successfully !!!");
+      })
+      .catch((err) => toast.success("Somethings went wrong !!!"));
+  };
+
   return (
     <table className="app__table">
       <thead>
@@ -14,17 +36,23 @@ const VolunteerList = () => {
       </thead>
 
       <tbody>
-        <tr>
-          <td>Kh Rakib</td>
-          <td>khr.rakib@gmail.com</td>
-          <td>22-10-2020</td>
-          <td> Organize books at the library.</td>
-          <td className="float-right">
-            <button className="btn btn-danger btn-sm">
-              <i className="far fa-trash-alt"></i>
-            </button>
-          </td>
-        </tr>
+        {volunteerList &&
+          volunteerList.map((item) => (
+            <tr key={item._id}>
+              <td>{item.name}</td>
+              <td>{item.email}</td>
+              <td>{item.date}</td>
+              <td> {item.selectedEvent}</td>
+              <td className="float-right">
+                <button
+                  onClick={() => handleDelete(item._id)}
+                  className="btn btn-danger btn-sm"
+                >
+                  <i className="far fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          ))}
       </tbody>
     </table>
   );

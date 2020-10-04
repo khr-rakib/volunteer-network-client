@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
+import { Link, NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
 import logo from "../Assets/logos/logo.png";
 import VolunteerList from "../components/Admin/VolunteerList";
 import AddEvent from "../components/Admin/AddEvent";
@@ -16,7 +16,9 @@ const Dashboard = () => {
         >
           <div className="row p-4">
             <div className="col-md-3">
-              <img src={logo} className="img-fluid w-50" alt="" />
+              <Link to="/">
+                <img src={logo} className="img-fluid w-50" alt="" />
+              </Link>
             </div>
             <div className="col-md-9">
               <p className="m-0 app__title">Volunteer register list</p>

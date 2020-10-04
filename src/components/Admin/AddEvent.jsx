@@ -1,16 +1,20 @@
 import React from "react";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddEvent = () => {
   const history = useHistory();
+  const [fileInputState, setFileInputState] = useState("");
+  const [previewSource, setpreviewSource] = useState("");
+  const [loader, setLoader] = useState(false);
 
   const [event, setEvent] = useState({
     name: "",
     date: "",
     description: "",
-    banner: "",
   });
+
   const handleChange = (e) => {
     setEvent({
       ...event,
@@ -18,19 +22,41 @@ const AddEvent = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    console.log(event);
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    previewFile(file);
+  };
+
+  const previewFile = (file) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setpreviewSource(reader.result);
+    };
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    fetch("http://localhost:5000/addEvent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        history.replace("/admin");
-      });
+    if (!previewSource) return;
+    setLoader(true);
+    uploadImage(previewSource);
+  };
+
+  const uploadImage = async (base64EncodedString) => {
+    try {
+      await fetch("https://infinite-temple-84022.herokuapp.com/addEvent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ banner: base64EncodedString, event }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          history.push("/admin");
+          toast.success("Event Added Successfully !!!");
+        });
+    } catch (error) {
+      toast.error("Somethings went wrong !!!");
+    }
   };
 
   return (
@@ -80,11 +106,23 @@ const AddEvent = () => {
             id="banner"
             name="banner"
             className="form-control-file"
-            onChange={handleChange}
+            accept="image/*"
+            onChange={handleFileInputChange}
+            value={fileInputState}
           />
+          {previewSource && <img src={previewSource} height="80px" alt="" />}
         </div>
         <div className="col-md-12">
-          <button className="btn btn-primary btn-block">Submit</button>
+          <button className="btn btn-primary btn-block">
+            {loader && (
+              <span
+                className="spinner-grow mr-2 spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            )}
+            Submit
+          </button>
         </div>
       </div>
     </form>
